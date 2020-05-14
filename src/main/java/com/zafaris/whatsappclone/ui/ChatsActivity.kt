@@ -46,16 +46,7 @@ class ChatsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_chats)
 
         setupRv()
-
-        val chatNames: List<String> = ParseUser.getCurrentUser().getList("chatsList")!!
-        if (chatNames.isNotEmpty()) {
-            for (chatName in chatNames) {
-                chatsList.add(Chat(chatName))
-            }
-            chatsAdapter.notifyDataSetChanged()
-        } else {
-            Toast.makeText(this, "No chats found", Toast.LENGTH_SHORT).show()
-        }
+        updateChats()
 
         fab.setOnClickListener {
             //TODO: Create new chat feature
@@ -76,5 +67,17 @@ class ChatsActivity : AppCompatActivity() {
     private fun chatOnClick(chat: Chat) {
         //TODO: Intent to chat activity and pass chat name
         Toast.makeText(this, chat.name, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun updateChats() {
+        val chatNames: List<String> = ParseUser.getCurrentUser().getList("chatsList")!!
+        if (chatNames.isNotEmpty()) {
+            for (chatName in chatNames) {
+                chatsList.add(Chat(chatName))
+            }
+            chatsAdapter.notifyDataSetChanged()
+        } else {
+            Toast.makeText(this, "No chats found", Toast.LENGTH_SHORT).show()
+        }
     }
 }
