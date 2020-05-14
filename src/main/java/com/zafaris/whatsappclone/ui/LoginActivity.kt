@@ -18,6 +18,13 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        if (ParseUser.getCurrentUser() != null) {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
+        title = "WhatsApp Clone: Login"
+
         button_main.setOnClickListener {
             val username = inputfield_username.editText!!.text.toString()
             val password = inputfield_password.editText!!.text.toString()

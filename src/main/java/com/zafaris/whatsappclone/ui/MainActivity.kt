@@ -7,11 +7,23 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.parse.ParseException
+import com.parse.ParseObject
+import com.parse.ParseQuery
 import com.parse.ParseUser
 import com.zafaris.whatsappclone.R
+import com.zafaris.whatsappclone.model.Chat
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.view.*
+import java.util.function.ToDoubleFunction
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var chatsAdapter: ChatsAdapter
+    private val chatsList: MutableList<Chat> = ArrayList()
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater
@@ -38,9 +50,33 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        if (ParseUser.getCurrentUser() == null) {
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
+        setupRv()
+
+        val chatNames: List<String> = ParseUser.getCurrentUser().getList("chatsList")!!
+        if (chatNames.isNotEmpty()) {
+            for (chatName in chatNames) {
+                chatsList.add(Chat(chatName))
+            }
+            chatsAdapter.notifyDataSetChanged()
+        } else {
+            Toast.makeText(this, "No chats found", Toast.LENGTH_SHORT).show()
         }
+
+        fab.setOnClickListener {
+            //TODO: Create new chat feature
+            Toast.makeText(this, "FAB Clicked", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun setupRv() {
+        chatsAdapter = ChatsAdapter(chatsList)
+        chatsAdapter.setOnItemClickListener { chat ->
+            Toast.makeText(this, chat.name, Toast.LENGTH_SHORT).show()
+        }
+        recyclerview_chats.adapter = chatsAdapter
+
+        val divider = DividerItemDecoration(applicationContext, LinearLayoutManager.VERTICAL)
+        recyclerview_chats.addItemDecoration(divider)
+        recyclerview_chats.layoutManager = LinearLayoutManager(this)
     }
 }
