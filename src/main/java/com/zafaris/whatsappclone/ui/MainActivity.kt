@@ -70,13 +70,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupRv() {
         chatsAdapter = ChatsAdapter(chatsList)
-        chatsAdapter.setOnItemClickListener { chat ->
-            Toast.makeText(this, chat.name, Toast.LENGTH_SHORT).show()
-        }
+        chatsAdapter.setOnItemClickListener { chat -> chatOnClick(chat) }
         recyclerview_chats.adapter = chatsAdapter
 
         val divider = DividerItemDecoration(applicationContext, LinearLayoutManager.VERTICAL)
         recyclerview_chats.addItemDecoration(divider)
         recyclerview_chats.layoutManager = LinearLayoutManager(this)
+    }
+
+    private fun chatOnClick(chat: Chat) {
+        //TODO: Intent to chat activity and pass chat name
+        Toast.makeText(this, chat.name, Toast.LENGTH_SHORT).show()
     }
 }
