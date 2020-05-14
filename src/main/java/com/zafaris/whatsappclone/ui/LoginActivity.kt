@@ -4,8 +4,6 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import com.parse.ParseException
-import com.parse.ParseQuery
 import com.parse.ParseUser
 import com.zafaris.whatsappclone.R
 import kotlinx.android.synthetic.main.activity_login.*
@@ -19,7 +17,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         if (ParseUser.getCurrentUser() != null) {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, ChatsActivity::class.java)
             startActivity(intent)
         }
 
@@ -31,7 +29,7 @@ class LoginActivity : AppCompatActivity() {
             if (loginOrSignup == 0) {
                 ParseUser.logInInBackground(username, password) { _, parseException ->
                     if (parseException == null) {
-                        val intent = Intent(this, MainActivity::class.java)
+                        val intent = Intent(this, ChatsActivity::class.java)
                         startActivity(intent)
                     } else {
                         Toast.makeText(this, parseException.message, Toast.LENGTH_SHORT).show()
@@ -43,7 +41,7 @@ class LoginActivity : AppCompatActivity() {
                 user.setPassword(password)
                 user.signUpInBackground { parseException ->
                     if (parseException == null) {
-                        val intent = Intent(this, MainActivity::class.java)
+                        val intent = Intent(this, ChatsActivity::class.java)
                         startActivity(intent)
                     } else {
                         Toast.makeText(this, parseException.message, Toast.LENGTH_SHORT).show()

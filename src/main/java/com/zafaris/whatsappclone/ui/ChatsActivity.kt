@@ -9,18 +9,13 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.snackbar.Snackbar
 import com.parse.ParseException
-import com.parse.ParseObject
-import com.parse.ParseQuery
 import com.parse.ParseUser
 import com.zafaris.whatsappclone.R
 import com.zafaris.whatsappclone.model.Chat
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_main.view.*
-import java.util.function.ToDoubleFunction
+import kotlinx.android.synthetic.main.activity_chats.*
 
-class MainActivity : AppCompatActivity() {
+class ChatsActivity : AppCompatActivity() {
 
     private lateinit var chatsAdapter: ChatsAdapter
     private val chatsList: MutableList<Chat> = ArrayList()
@@ -48,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_chats)
 
         setupRv()
 
