@@ -17,7 +17,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         if (ParseUser.getCurrentUser() != null) {
-            val intent = Intent(this, ChatsActivity::class.java)
+            val intent = Intent(this, HomeActivity::class.java)
             startActivity(intent)
         }
 
@@ -29,7 +29,7 @@ class LoginActivity : AppCompatActivity() {
             if (loginOrSignup == 0) {
                 ParseUser.logInInBackground(username, password) { _, parseException ->
                     if (parseException == null) {
-                        val intent = Intent(this, ChatsActivity::class.java)
+                        val intent = Intent(this, HomeActivity::class.java)
                         startActivity(intent)
                     } else {
                         Toast.makeText(this, parseException.message, Toast.LENGTH_SHORT).show()
@@ -41,7 +41,7 @@ class LoginActivity : AppCompatActivity() {
                 user.setPassword(password)
                 user.signUpInBackground { parseException ->
                     if (parseException == null) {
-                        val intent = Intent(this, ChatsActivity::class.java)
+                        val intent = Intent(this, HomeActivity::class.java)
                         startActivity(intent)
                     } else {
                         Toast.makeText(this, parseException.message, Toast.LENGTH_SHORT).show()

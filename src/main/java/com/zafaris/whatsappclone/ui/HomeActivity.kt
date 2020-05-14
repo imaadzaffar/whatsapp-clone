@@ -13,9 +13,9 @@ import com.parse.ParseException
 import com.parse.ParseUser
 import com.zafaris.whatsappclone.R
 import com.zafaris.whatsappclone.model.Chat
-import kotlinx.android.synthetic.main.activity_chats.*
+import kotlinx.android.synthetic.main.activity_home.*
 
-class ChatsActivity : AppCompatActivity() {
+class HomeActivity : AppCompatActivity() {
 
     private lateinit var chatsAdapter: ChatsAdapter
     private val chatsList: MutableList<Chat> = ArrayList()
@@ -43,7 +43,7 @@ class ChatsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_chats)
+        setContentView(R.layout.activity_home)
 
         setupRv()
         updateChats()
@@ -67,6 +67,9 @@ class ChatsActivity : AppCompatActivity() {
     private fun chatOnClick(chat: Chat) {
         //TODO: Intent to chat activity and pass chat name
         Toast.makeText(this, chat.name, Toast.LENGTH_SHORT).show()
+
+        val intent = Intent(this, ChatActivity::class.java)
+        startActivity(intent)
     }
 
     private fun updateChats() {
