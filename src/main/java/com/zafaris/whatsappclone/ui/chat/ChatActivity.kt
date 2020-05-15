@@ -1,5 +1,7 @@
 package com.zafaris.whatsappclone.ui.chat
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -17,11 +19,14 @@ import kotlinx.android.synthetic.main.activity_chat.*
 class ChatActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var chatsReference: DatabaseReference
     private lateinit var messagesReference: DatabaseReference
 
+    private lateinit var prefs: SharedPreferences
     private lateinit var userId: String
     private lateinit var messagesAdapter: MessagesAdapter
     private val messagesList: MutableList<Message> = ArrayList()
+    private val messageIdsList: MutableList<String> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +37,7 @@ class ChatActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         userId = auth.uid!!
 
+        chatsReference = Firebase.database.getReference("chats/$chatId")
         messagesReference = Firebase.database.getReference("messages/$chatId")
 
         setupRv()
@@ -50,18 +56,37 @@ class ChatActivity : AppCompatActivity() {
             }
 
             override fun onChildAdded(dataSnapshot: DataSnapshot, p1: String?) {
+                val messageId = dataSnapshot.key!!
+                messageIdsList.add(messageId)
                 val message = dataSnapshot.getValue<Message>()!!
                 messagesList.add(message)
                 messagesAdapter.notifyDataSetChanged()
             }
 
             override fun onChildRemoved(dataSnapshot: DataSnapshot) {
-                TODO("Not yet implemented")
+                val messageId = dataSnapshot.key!!
+                if (messageId in messageIdsList) {
+                    messageIdsList.remove(messageId)
+                    messagesList.remove(dataSnapshot.getValue<Message>())
+                    messagesAdapter.notifyDataSetChanged() //TODO: Change to notifyItemRemoved()
+                }
             }
 
         })
 
-        button_send.setOnClickListener { TODO("Send new message with message entered and userId") }
+        prefs = getSharedPreferences("com.zafaris.whatsappclone", Context.MODE_PRIVATE)
+        val name = prefs.getString("name", "")!!
+
+        button_send.setOnClickListener {
+            val messageText = edittext_message.text.toString()
+            if (messageText.isNotEmpty()) {
+                val message = Message(messageText, name, userId)
+                messagesReference.push().setValue(message)
+                chatsReference.child("lastMessage").setValue("${name}: ${message.message}")
+            } else {
+                Toast.makeText(this, "Please enter a message", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun setupRv() {

@@ -93,24 +93,32 @@ class HomeActivity : AppCompatActivity() {
     private fun getChats() {
 
         //Retrieves all chatId strings in the user's chatList
+        //TODO: Change to childEventListener
         userChatsReference.addValueEventListener(object : ValueEventListener {
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.value != null) {
+                    chatIdsList.clear()
+                    chatsList.clear()
+
+                    //Retrieves chat object for each chatId in the user's chatList
                     for (chatIdSnapshot in dataSnapshot.children) {
                         val chatId = chatIdSnapshot.key!!
-                        Log.d("chatId", chatId)
 
-                        //Retrieves chat object for each chatId in the user's chatList
                         chatsReference.orderByKey().equalTo(chatId)
-                            .addListenerForSingleValueEvent(object : ValueEventListener {
+                            .addValueEventListener(object : ValueEventListener {
 
                             override fun onDataChange(dataSnapshot: DataSnapshot) {
                                 if (dataSnapshot.value != null) {
                                     for (chatSnapshot in dataSnapshot.children) {
                                         val chat = chatSnapshot.getValue<Chat>()!!
-                                        chatIdsList.add(chatId)
-                                        chatsList.add(chat)
+                                        if (chatId in chatIdsList) {
+                                            chatsList.removeAt(chatIdsList.indexOf(chatId))
+                                            chatsList.add(chat)
+                                        } else {
+                                            chatIdsList.add(chatId)
+                                            chatsList.add(chat)
+                                        }
                                     }
                                     chatsAdapter.notifyDataSetChanged()
                                 }
