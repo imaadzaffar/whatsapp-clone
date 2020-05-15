@@ -1,4 +1,4 @@
-package com.zafaris.whatsappclone.ui
+package com.zafaris.whatsappclone.ui.chat
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,13 +7,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.zafaris.whatsappclone.R
 import com.zafaris.whatsappclone.model.Message
-import kotlinx.android.synthetic.main.item_message_me.view.*
 import java.lang.IllegalArgumentException
 
-class MessagesAdapter(private val messagesList: List<Message>): RecyclerView.Adapter<MessagesAdapter.BaseViewHolder<*>>() {
+class MessagesAdapter(private val userId: String, private val messagesList: List<Message>): RecyclerView.Adapter<MessagesAdapter.BaseViewHolder<*>>() {
 
     override fun getItemViewType(position: Int): Int {
-        return when (messagesList[position].sentByMe) {
+        return when (messagesList[position].userId == userId) {
             true -> TYPE_ME
             false -> TYPE_OTHER
         }
@@ -54,7 +53,7 @@ class MessagesAdapter(private val messagesList: List<Message>): RecyclerView.Ada
             val messageTextView: TextView = itemView.findViewById(R.id.textview_me_message)
             val usernameTextView: TextView = itemView.findViewById(R.id.textview_me_username)
             messageTextView.text = item.message
-            usernameTextView.text = item.username
+            usernameTextView.text = item.name
         }
 
     }
@@ -65,7 +64,7 @@ class MessagesAdapter(private val messagesList: List<Message>): RecyclerView.Ada
             val messageTextView: TextView = itemView.findViewById(R.id.textview_other_message)
             val usernameTextView: TextView = itemView.findViewById(R.id.textview_other_username)
             messageTextView.text = item.message
-            usernameTextView.text = item.username
+            usernameTextView.text = item.name
         }
     }
 
