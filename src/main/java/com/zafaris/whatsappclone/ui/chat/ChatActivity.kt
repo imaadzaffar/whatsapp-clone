@@ -86,6 +86,7 @@ class ChatActivity : AppCompatActivity() {
             }
         })
 
+        //TODO: Clear editText after send button clicked
         button_send.setOnClickListener {
             val messageText = edittext_message.text.toString()
             if (messageText.isNotEmpty()) {
