@@ -17,6 +17,7 @@ import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
 import com.zafaris.whatsappclone.R
 import com.zafaris.whatsappclone.model.Chat
+import com.zafaris.whatsappclone.model.Message
 import com.zafaris.whatsappclone.ui.chat.ChatActivity
 import com.zafaris.whatsappclone.ui.login.LoginActivity
 import kotlinx.android.synthetic.main.activity_home.*
@@ -93,7 +94,6 @@ class HomeActivity : AppCompatActivity() {
     private fun getChats() {
 
         //Retrieves all chatId strings in the user's chatList
-        //TODO: Change to childEventListener
         userChatsReference.addValueEventListener(object : ValueEventListener {
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -106,29 +106,45 @@ class HomeActivity : AppCompatActivity() {
                         val chatId = chatIdSnapshot.key!!
 
                         chatsReference.orderByKey().equalTo(chatId)
-                            .addValueEventListener(object : ValueEventListener {
+                            .addChildEventListener(object : ChildEventListener {
+                                override fun onCancelled(databaseError: DatabaseError) {
+                                    Toast.makeText(this@HomeActivity, databaseError.message, Toast.LENGTH_SHORT).show()
+                                }
 
-                            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                                if (dataSnapshot.value != null) {
-                                    for (chatSnapshot in dataSnapshot.children) {
-                                        val chat = chatSnapshot.getValue<Chat>()!!
-                                        if (chatId in chatIdsList) {
-                                            chatsList.removeAt(chatIdsList.indexOf(chatId))
-                                            chatsList.add(chat)
-                                        } else {
-                                            chatIdsList.add(chatId)
-                                            chatsList.add(chat)
-                                        }
+                                override fun onChildMoved(dataSnapshot: DataSnapshot, p1: String?) {
+                                    TODO("Not yet implemented")
+                                }
+
+                                override fun onChildChanged(dataSnapshot: DataSnapshot, p1: String?) {
+                                    val chatId = dataSnapshot.key!!
+                                    val updatedChat = dataSnapshot.getValue<Chat>()!!
+                                    val index = chatIdsList.indexOf(chatId)
+                                    if (index > -1) {
+                                        chatsList[index] = updatedChat
+                                        chatsAdapter.notifyItemChanged(index)
                                     }
+                                }
+
+                                override fun onChildAdded(dataSnapshot: DataSnapshot, p1: String?) {
+                                    val chatId = dataSnapshot.key!!
+                                    chatIdsList.add(chatId)
+                                    val chat = dataSnapshot.getValue<Chat>()!!
+                                    chatsList.add(chat)
                                     chatsAdapter.notifyDataSetChanged()
                                 }
-                            }
 
-                            override fun onCancelled(databaseError: DatabaseError) {
-                                Log.d("chats", databaseError.message)
-                                Toast.makeText(this@HomeActivity, "Error getting chats from server...", Toast.LENGTH_SHORT).show()
-                            }
-                        })
+                                override fun onChildRemoved(dataSnapshot: DataSnapshot) {
+                                    val chatId = dataSnapshot.key!!
+                                    val index = chatIdsList.indexOf(chatId)
+                                    if (index > -1) {
+                                        chatIdsList.removeAt(index)
+                                        chatsList.removeAt(index)
+                                        chatsAdapter.notifyItemRemoved(index)
+                                    }
+                                }
+
+                            })
+
                     }
                 } else {
                     Toast.makeText(this@HomeActivity, "No chats yet!", Toast.LENGTH_SHORT).show()

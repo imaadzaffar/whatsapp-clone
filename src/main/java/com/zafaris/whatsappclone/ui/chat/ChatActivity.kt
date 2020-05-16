@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
@@ -34,6 +35,9 @@ class ChatActivity : AppCompatActivity() {
 
         val chatId = intent.getStringExtra("chatId")
 
+        prefs = getSharedPreferences("com.zafaris.whatsappclone", Context.MODE_PRIVATE)
+        val name = prefs.getString("name", "")!!
+
         auth = FirebaseAuth.getInstance()
         userId = auth.uid!!
 
@@ -52,7 +56,13 @@ class ChatActivity : AppCompatActivity() {
             }
 
             override fun onChildChanged(dataSnapshot: DataSnapshot, p1: String?) {
-                TODO("Not yet implemented")
+                val messageId = dataSnapshot.key!!
+                val updatedMessage = dataSnapshot.getValue<Message>()!!
+                val index = messageIdsList.indexOf(messageId)
+                if (index > -1) {
+                    messagesList[index] = updatedMessage
+                    messagesAdapter.notifyItemChanged(index)
+                }
             }
 
             override fun onChildAdded(dataSnapshot: DataSnapshot, p1: String?) {
@@ -61,21 +71,20 @@ class ChatActivity : AppCompatActivity() {
                 val message = dataSnapshot.getValue<Message>()!!
                 messagesList.add(message)
                 messagesAdapter.notifyDataSetChanged()
+                recyclerview_messages.scrollToPosition(messagesAdapter.itemCount - 1)
             }
 
             override fun onChildRemoved(dataSnapshot: DataSnapshot) {
                 val messageId = dataSnapshot.key!!
-                if (messageId in messageIdsList) {
-                    messageIdsList.remove(messageId)
-                    messagesList.remove(dataSnapshot.getValue<Message>())
-                    messagesAdapter.notifyDataSetChanged() //TODO: Change to notifyItemRemoved()
+                val index = messageIdsList.indexOf(messageId)
+                if (index > -1) {
+                    messageIdsList.removeAt(index)
+                    messagesList.removeAt(index)
+                    messagesAdapter.notifyItemRemoved(index)
+                    recyclerview_messages.scrollToPosition(messagesAdapter.itemCount - 1)
                 }
             }
-
         })
-
-        prefs = getSharedPreferences("com.zafaris.whatsappclone", Context.MODE_PRIVATE)
-        val name = prefs.getString("name", "")!!
 
         button_send.setOnClickListener {
             val messageText = edittext_message.text.toString()
@@ -96,7 +105,8 @@ class ChatActivity : AppCompatActivity() {
                 messagesList
             )
         recyclerview_messages.adapter = messagesAdapter
-        recyclerview_messages.layoutManager = LinearLayoutManager(this)
+        val layoutManager = LinearLayoutManager(this)
+        recyclerview_messages.layoutManager = layoutManager
     }
 
 }
