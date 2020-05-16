@@ -20,6 +20,7 @@ import com.zafaris.whatsappclone.model.Chat
 import com.zafaris.whatsappclone.model.Message
 import com.zafaris.whatsappclone.ui.chat.ChatActivity
 import com.zafaris.whatsappclone.ui.login.LoginActivity
+import com.zafaris.whatsappclone.ui.newchat.NewChatActivity
 import kotlinx.android.synthetic.main.activity_home.*
 
 class HomeActivity : AppCompatActivity() {
@@ -61,18 +62,9 @@ class HomeActivity : AppCompatActivity() {
         getChats()
 
         fab.setOnClickListener {
-            //TODO: Create new chat feature
-            Toast.makeText(this, "FAB Clicked", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, NewChatActivity::class.java)
+            startActivity(intent)
         }
-
-        /*TODO: Create new chat code
-        val databaseRef = Firebase.database.reference
-        val chatIdKey = databaseRef.push().key
-        val updatesMap: HashMap<String, Any> = HashMap()
-        updatesMap["chats/$chatIdKey"] = Chat(name = "New Chat Name")
-        updatesMap["users/${auth.uid!!}/chatsList/$chatIdKey"] = true
-        databaseRef.updateChildren(updatesMap)
-         */
     }
 
     private fun setupRv() {
@@ -88,6 +80,7 @@ class HomeActivity : AppCompatActivity() {
     private fun chatOnClick(position: Int) {
         val intent = Intent(this, ChatActivity::class.java)
         intent.putExtra("chatId", chatIdsList[position])
+        intent.putExtra("chatName", chatsList[position].name)
         startActivity(intent)
     }
 

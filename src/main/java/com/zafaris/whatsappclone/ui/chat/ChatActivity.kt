@@ -32,6 +32,9 @@ class ChatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
+        val chatName = intent.getStringExtra("chatName")
+        title = chatName
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val chatId = intent.getStringExtra("chatId")
 
