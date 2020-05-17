@@ -1,6 +1,8 @@
 package com.zafaris.whatsappclone.ui.home
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -28,6 +30,9 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var userChatsReference: DatabaseReference
     private lateinit var chatsReference: DatabaseReference
+
+    private lateinit var prefs: SharedPreferences
+    private var name = ""
 
     private lateinit var chatsAdapter: ChatsAdapter
     private val chatIdsList: MutableList<String> = ArrayList()
@@ -58,6 +63,9 @@ class HomeActivity : AppCompatActivity() {
 
         userChatsReference = Firebase.database.getReference("users/${auth.uid!!}/chats")
         chatsReference = Firebase.database.getReference("chats")
+
+        prefs = getSharedPreferences("com.zafaris.whatsappclone", Context.MODE_PRIVATE)
+        name = prefs.getString("name", "")!!
 
         getChats()
 
@@ -97,15 +105,29 @@ class HomeActivity : AppCompatActivity() {
                     //Retrieves chat object for each chatId in the user's chatList
                     for (chatIdSnapshot in dataSnapshot.children) {
                         val chatId = chatIdSnapshot.key!!
+                        chatIdsList.add(chatId)
 
                         chatsReference.orderByKey().equalTo(chatId)
                             .addChildEventListener(object : ChildEventListener {
-                                override fun onCancelled(databaseError: DatabaseError) {
-                                    Toast.makeText(this@HomeActivity, databaseError.message, Toast.LENGTH_SHORT).show()
-                                }
-
                                 override fun onChildMoved(dataSnapshot: DataSnapshot, p1: String?) {
                                     TODO("Not yet implemented")
+                                }
+
+                                override fun onChildAdded(dataSnapshot: DataSnapshot, p1: String?) {
+                                    val chatId = dataSnapshot.key!!
+                                    chatIdsList.add(chatId)
+                                    val chat = dataSnapshot.getValue<Chat>()!!
+                                    val usersRef = dataSnapshot.child("userNames")
+                                    if (dataSnapshot.child("name").value == null) {
+                                        for (userName in usersRef.children) {
+                                            if (userName.key != name) {
+                                                val chatName = userName.key!!
+                                                chat.name = chatName
+                                            }
+                                        }
+                                    }
+                                    chatsList.add(chat)
+                                    chatsAdapter.notifyDataSetChanged()
                                 }
 
                                 override fun onChildChanged(dataSnapshot: DataSnapshot, p1: String?) {
@@ -113,17 +135,18 @@ class HomeActivity : AppCompatActivity() {
                                     val updatedChat = dataSnapshot.getValue<Chat>()!!
                                     val index = chatIdsList.indexOf(chatId)
                                     if (index > -1) {
+                                        if (dataSnapshot.child("name").value == null) {
+                                            val usersRef = dataSnapshot.child("userNames")
+                                            for (userName in usersRef.children) {
+                                                if (userName.key != name) {
+                                                    val chatName = userName.key!!
+                                                    updatedChat.name = chatName
+                                                }
+                                            }
+                                        }
                                         chatsList[index] = updatedChat
                                         chatsAdapter.notifyItemChanged(index)
                                     }
-                                }
-
-                                override fun onChildAdded(dataSnapshot: DataSnapshot, p1: String?) {
-                                    val chatId = dataSnapshot.key!!
-                                    chatIdsList.add(chatId)
-                                    val chat = dataSnapshot.getValue<Chat>()!!
-                                    chatsList.add(chat)
-                                    chatsAdapter.notifyDataSetChanged()
                                 }
 
                                 override fun onChildRemoved(dataSnapshot: DataSnapshot) {
@@ -136,8 +159,10 @@ class HomeActivity : AppCompatActivity() {
                                     }
                                 }
 
+                                override fun onCancelled(databaseError: DatabaseError) {
+                                    Toast.makeText(this@HomeActivity, databaseError.message, Toast.LENGTH_SHORT).show()
+                                }
                             })
-
                     }
                 } else {
                     Toast.makeText(this@HomeActivity, "No chats yet!", Toast.LENGTH_SHORT).show()

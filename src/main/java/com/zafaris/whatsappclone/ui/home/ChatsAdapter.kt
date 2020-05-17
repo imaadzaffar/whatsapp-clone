@@ -23,7 +23,6 @@ class ChatsAdapter(private val chatsList: List<Chat>) : RecyclerView.Adapter<Cha
     override fun onBindViewHolder(holder: ChatsViewHolder, position: Int) {
         holder.nameTextView.text = chatsList[position].name
         holder.lastMessageTextView.text = chatsList[position].lastMessage
-        //holder.pictureImageView.setImageDrawable(chatsList[position].image)
     }
 
     override fun getItemCount(): Int = chatsList.size
@@ -31,7 +30,6 @@ class ChatsAdapter(private val chatsList: List<Chat>) : RecyclerView.Adapter<Cha
     inner class ChatsViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val nameTextView: TextView = itemView.findViewById(R.id.textview_chat_name)
         val lastMessageTextView: TextView = itemView.findViewById(R.id.textview_chat_last_message)
-        //val pictureImageView: ImageView = itemView.findViewById(R.id.imageview_chat_picture)
 
         init {
             itemView.setOnClickListener { listener?.invoke(adapterPosition) }

@@ -1,7 +1,7 @@
 package com.zafaris.whatsappclone.model
 
 data class Chat (
-    val name: String = "",
-    val lastMessage: String = ""
-    //TODO: val users: List<String>
+    var name: String? = null,
+    val lastMessage: String? = null,
+    var userNames: HashMap<String, Boolean> = HashMap()
 )

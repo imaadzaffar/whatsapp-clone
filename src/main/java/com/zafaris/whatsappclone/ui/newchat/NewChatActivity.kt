@@ -1,5 +1,8 @@
 package com.zafaris.whatsappclone.ui.newchat
 
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -18,6 +21,8 @@ import com.google.firebase.ktx.Firebase
 import com.zafaris.whatsappclone.R
 import com.zafaris.whatsappclone.model.Chat
 import com.zafaris.whatsappclone.model.User
+import com.zafaris.whatsappclone.ui.chat.ChatActivity
+import com.zafaris.whatsappclone.ui.home.HomeActivity
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.activity_new_chat.*
 
@@ -25,6 +30,8 @@ class NewChatActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var databaseReference: DatabaseReference
+    private lateinit var prefs: SharedPreferences
+    private var name = ""
 
     private lateinit var selectUsersAdapter: SelectUsersAdapter
     private val userIdsList: MutableList<String> = ArrayList()
@@ -40,20 +47,28 @@ class NewChatActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         databaseReference = Firebase.database.reference
 
+        prefs = getSharedPreferences("com.zafaris.whatsappclone", Context.MODE_PRIVATE)
+        name = prefs.getString("name", "")!!
+
         setupRv()
 
         getUsers()
 
         button_new_chat.setOnClickListener {
             if (usersSelectedList.size == 1) {
-                val chatName = usersList[usersSelectedList[0]].name
-                Toast.makeText(this, "Creating new chat: $chatName", Toast.LENGTH_SHORT).show()
-                createNewChat(chatName)
+                Toast.makeText(this, "Creating new chat with ${usersList[usersSelectedList[0]]}", Toast.LENGTH_SHORT).show()
+
+                userIdsList.add(auth.uid!!)
+                val chat = Chat()
+                createNewChat(chat)
             } else if (usersSelectedList.size > 1) {
                 if (edittext_new_chat_name.text.isNotEmpty()) {
                     val chatName = edittext_new_chat_name.text.toString()
                     Toast.makeText(this, "Creating new chat: $chatName", Toast.LENGTH_SHORT).show()
-                    createNewChat(chatName)
+
+                    userIdsList.add(auth.uid!!)
+                    val chat = Chat(name = chatName)
+                    createNewChat(chat)
                 } else {
                     Toast.makeText(this, "Please enter a chat name", Toast.LENGTH_SHORT).show()
                 }
@@ -86,16 +101,28 @@ class NewChatActivity : AppCompatActivity() {
         })
     }
 
-    private fun createNewChat(chatName: String) {
-        val chat = Chat(chatName)
-        val chatIdKey = databaseReference.push().key
+    private fun createNewChat(chat: Chat) {
+        val chatId = databaseReference.push().key
+
+        val userNames: HashMap<String, Boolean> = HashMap()
         val updatesMap: HashMap<String, Any> = HashMap()
-        updatesMap["chats/$chatIdKey"] = chat
-        updatesMap["users/${auth.uid!!}/chats/$chatIdKey"] = true
-        for (userId in userIdsList) {
-            updatesMap["users/$userId/chats/$chatIdKey"] = true
+
+        userNames[name] = true
+        updatesMap["users/${auth.uid!!}/chats/$chatId"] = true
+
+        for (index in usersSelectedList) {
+            userNames[usersList[index].name] = true
+            val userId = userIdsList[index]
+            updatesMap["users/$userId/chats/$chatId"] = true
         }
+        chat.userNames = userNames
+
+        updatesMap["chats/$chatId"] = chat
         databaseReference.updateChildren(updatesMap)
+
+        val intent = Intent(this, ChatActivity::class.java)
+        intent.putExtra("chatId", chatId)
+        startActivity(intent)
     }
 
     private fun setupRv() {

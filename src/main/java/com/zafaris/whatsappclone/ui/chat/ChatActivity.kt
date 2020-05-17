@@ -96,6 +96,7 @@ class ChatActivity : AppCompatActivity() {
                 val message = Message(messageText, name, userId)
                 messagesReference.push().setValue(message)
                 chatsReference.child("lastMessage").setValue("${name}: ${message.message}")
+                edittext_message.text.clear()
             } else {
                 Toast.makeText(this, "Please enter a message", Toast.LENGTH_SHORT).show()
             }

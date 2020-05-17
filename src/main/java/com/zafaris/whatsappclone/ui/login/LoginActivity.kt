@@ -32,7 +32,7 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-        title = "WhatsApp Clone: Login"
+        title = "Login"
 
         auth = FirebaseAuth.getInstance()
         if (auth.currentUser != null) {
@@ -86,7 +86,8 @@ class LoginActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     Toast.makeText(this, "Sign in successful", Toast.LENGTH_SHORT).show()
 
-                    userReference.addListenerForSingleValueEvent(object : ValueEventListener {
+                    userReference.orderByKey().equalTo(auth.uid!!)
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onCancelled(databaseError: DatabaseError) {
                             Toast.makeText(this@LoginActivity, "Error getting user info...", Toast.LENGTH_SHORT).show()
                         }
