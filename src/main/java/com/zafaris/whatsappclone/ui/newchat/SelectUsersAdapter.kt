@@ -10,7 +10,7 @@ import com.zafaris.whatsappclone.R
 import com.zafaris.whatsappclone.model.User
 
 class SelectUsersAdapter(private val usersList: List<User>, private val usersSelectedList: List<Int>) : RecyclerView.Adapter<SelectUsersAdapter.SelectUserViewHolder>() {
-    private var listener: ((Int, Boolean) -> Unit)? = null
+    var listener: ((Int, Boolean) -> Unit)? = null
 
     fun setOnCheckedChangedListener(listener: ((Int, Boolean) -> Unit)?) {
         this.listener = listener

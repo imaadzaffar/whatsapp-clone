@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -22,7 +21,6 @@ import com.zafaris.whatsappclone.ui.home.HomeActivity
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity() {
-
     private lateinit var auth: FirebaseAuth
     private lateinit var userReference: DatabaseReference
 
@@ -39,31 +37,36 @@ class LoginActivity : AppCompatActivity() {
             val intent = Intent(this, HomeActivity::class.java)
             startActivity(intent)
         }
+        userReference = Firebase.database.getReference("users")
 
         prefs = getSharedPreferences("com.zafaris.whatsappclone", Context.MODE_PRIVATE)
 
-        userReference = Firebase.database.getReference("users")
-
+        //Login or sign up button onClick
         button_main.setOnClickListener {
             val email = inputfield_email.editText!!.text.toString()
             val password = inputfield_password.editText!!.text.toString()
             if (email.isNotEmpty()) {
                 if (password.isNotEmpty()) {
+
+                    //Checks if state is 0 - login, 1 - signup
                     if (loginOrSignup == 0) {
                         signIn(email, password)
                     } else {
                         val name = inputfield_name.editText!!.text.toString()
                         signUp(name, email, password)
                     }
+
                 } else {
                     Toast.makeText(this, "Please enter a password", Toast.LENGTH_SHORT).show()
                 }
             } else {
-                Toast.makeText(this, "Please enter a email", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please enter an email", Toast.LENGTH_SHORT).show()
             }
         }
 
+        //Toggle loginOrSignup button onClick
         button_alt.setOnClickListener {
+            //Checks if state is 0 - login, 1 - signup
             if (loginOrSignup == 0) {
                 loginOrSignup = 1
                 inputfield_name.visibility = View.VISIBLE
@@ -84,24 +87,31 @@ class LoginActivity : AppCompatActivity() {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Sign in successful", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@LoginActivity, "Login successful!", Toast.LENGTH_LONG)
+                        .show()
 
                     userReference.orderByKey().equalTo(auth.uid!!)
                         .addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onCancelled(databaseError: DatabaseError) {
-                            Toast.makeText(this@LoginActivity, "Error getting user info...", Toast.LENGTH_SHORT).show()
-                        }
 
-                        override fun onDataChange(dataSnapshot: DataSnapshot) {
-                            for (userSnapshot in dataSnapshot.children) {
-                                val name = userSnapshot.child("name").getValue<String>()!!
-                                Log.d("name", name)
-                                prefs.edit().putString("name", name).apply()
+                            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                for (userSnapshot in dataSnapshot.children) {
+                                    val name = userSnapshot.child("name").getValue<String>()!!
+                                    prefs.edit().putString("name", name).apply()  //Save current user's name to sharedPref
+                                }
+
+                                //Intent to HomeActivity
+                                val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+                                startActivity(intent)
                             }
-                            val intent = Intent(this@LoginActivity, HomeActivity::class.java)
-                            startActivity(intent)
-                        }
-                    })
+
+                            override fun onCancelled(databaseError: DatabaseError) {
+                                Toast.makeText(
+                                    this@LoginActivity,
+                                    databaseError.message,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        })
 
                 } else {
                     Toast.makeText(this, task.exception?.message, Toast.LENGTH_SHORT).show()
@@ -114,12 +124,15 @@ class LoginActivity : AppCompatActivity() {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
+                        Toast.makeText(this, "Sign up successful!", Toast.LENGTH_LONG).show()
+
                         val user = User(name, email)
                         userReference.child(auth.uid!!).setValue(user)
-                        Toast.makeText(this, "Sign up successful", Toast.LENGTH_SHORT).show()
 
-                        prefs.edit().putString("name", name).apply()
-                        val intent = Intent(this, HomeActivity::class.java)
+                        prefs.edit().putString("name", name).apply()  //Save current user's name to sharedPref
+
+                        //Intent to HomeActivity
+                        val intent = Intent(this@LoginActivity, HomeActivity::class.java)
                         startActivity(intent)
                     } else {
                         Toast.makeText(this, task.exception?.message, Toast.LENGTH_SHORT).show()
