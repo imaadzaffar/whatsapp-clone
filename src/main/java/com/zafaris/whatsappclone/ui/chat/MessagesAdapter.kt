@@ -1,5 +1,6 @@
 package com.zafaris.whatsappclone.ui.chat
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,12 +10,20 @@ import com.zafaris.whatsappclone.R
 import com.zafaris.whatsappclone.model.Message
 import java.lang.IllegalArgumentException
 
-class MessagesAdapter(private val userId: String, private val messagesList: List<Message>): RecyclerView.Adapter<MessagesAdapter.BaseViewHolder<*>>() {
+class MessagesAdapter(private val currentUserId: String, private val messagesList: List<Message>) :
+    RecyclerView.Adapter<MessagesAdapter.BaseViewHolder<*>>() {
 
     override fun getItemViewType(position: Int): Int {
-        return when (messagesList[position].userId == userId) {
-            true -> TYPE_ME
-            false -> TYPE_OTHER
+        Log.d("userId", messagesList[position].userId)
+        return when (messagesList[position].userId == currentUserId) {
+            true -> {
+                Log.d("position: $position", "TYPE_ME")
+                TYPE_ME
+            }
+            false -> {
+                Log.d("position: $position", "TYPE_OTHER")
+                TYPE_OTHER
+            }
         }
     }
 

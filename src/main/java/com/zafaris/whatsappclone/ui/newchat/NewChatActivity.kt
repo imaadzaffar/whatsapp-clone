@@ -137,8 +137,7 @@ class NewChatActivity : AppCompatActivity() {
 
         //Adds values for the current user (as it is not in usersSelectedList)
         userNames[name] = true  //Adds name of the current user
-        updatesMap["users/${currentUserId}/chats/$chatId"] =
-            true  //dds chatId to the current user's chats
+        updatesMap["users/${currentUserId}/chats/$chatId"] = true  //dds chatId to the current user's chats
 
         //Adds values for each user in the usersSelectedList
         for (index in usersSelectedList) {
@@ -146,14 +145,20 @@ class NewChatActivity : AppCompatActivity() {
             val userId = userIdsList[index]  //userId of the user
             updatesMap["users/$userId/chats/$chatId"] = true  //Adds chatId to the user's chats
         }
-        chat.userNames =
-            userNames //Sets the new chat's userNames to the userNames in usersSelectedList
+        chat.userNames = userNames //Sets the new chat's userNames to the userNames in usersSelectedList
 
         updatesMap["chats/$chatId"] = chat  //Adds new chat object to the new chatId node
         databaseReference.updateChildren(updatesMap)
 
         //Intent to ChatActivity
         val intent = Intent(this, ChatActivity::class.java)
+        //Checks if only one user is selected
+        if (usersSelectedList.size == 1) {
+            val chatName = usersList[usersSelectedList[0]].name  //Sets chatName to other user's userName
+            intent.putExtra("chatName", chatName)
+        } else {
+            intent.putExtra("chatName", chat.name)  //Sets chatName to value entered in editText
+        }
         intent.putExtra("chatId", chatId)
         startActivity(intent)
     }

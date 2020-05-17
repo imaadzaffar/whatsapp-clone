@@ -3,6 +3,7 @@ package com.zafaris.whatsappclone.ui.chat
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,12 +41,12 @@ class ChatActivity : AppCompatActivity() {
         prefs = getSharedPreferences("com.zafaris.whatsappclone", Context.MODE_PRIVATE)
         val name = prefs.getString("name", "")!!
 
-        setupRv()
-
         auth = FirebaseAuth.getInstance()
         currentUserId = auth.uid!!
         chatsReference = Firebase.database.getReference("chats/$chatId")
         messagesReference = Firebase.database.getReference("messages/$chatId")
+
+        setupRv()
 
         messagesReference.addChildEventListener(object : ChildEventListener {
 
@@ -98,6 +99,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun setupRv() {
+        Log.d("currentUserId", currentUserId)
         messagesAdapter = MessagesAdapter(currentUserId, messagesList)
         recyclerview_messages.adapter = messagesAdapter
         val layoutManager = LinearLayoutManager(this)
